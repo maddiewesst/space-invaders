@@ -1,0 +1,47 @@
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* body {
+    background: url(assets/galaxy.jpg);
+
+} */
+
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.score {
+    color: white;
+}
+
+.game {
+    width: 400px;
+    height: 400px;
+    border: 1px solid rgb(255, 255, 255);
+    /* display: flex;
+    justify-content: center;
+    align-items: center; */
+}
+
+.lives {
+    color: white;
+}
+
+.game .laser {
+    position: absolute;
+    margin-left: -2.5;
+    height: 25px;
+    z-index: -1;
+}
+
+.game .enemy {
+    position: absolute;
+}
