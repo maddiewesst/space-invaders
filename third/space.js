@@ -1,11 +1,14 @@
-const up = 38
-const down = 40
 const right = 39
 const left = 37
 const space = 32
+const esc = 27
+const c = 67
+const s = 83
+const r = 82
+const u = 85
 
-const gameWidth= 400
-const gameHeight = 400
+const gameWidth= 500
+const gameHeight = 700
 
 let i = 0
 let j = 0
@@ -19,11 +22,28 @@ const state = {
   shoot : false,
   lasers : [],
   enemies : [],
-  enemyWidth : 20,
+  enemyLasers: [],
+  enemyWidth : 25,
   cooldown : 0,
-  numberEnemies : 16,
-
+  enemyCooldown: 0,
+  numberEnemies : 40,
+  paused : false,
+  gameOver: false,
+  lives: 3,
+  score: 0,
+  gameWon: false,
+  start: false,
 }
+
+const header = document.querySelector('.header');
+const pause = document.querySelector('.pause')
+const lives = document.querySelector('.lives p')
+const score = document.querySelector('.score p')
+const gameOver = document.querySelector('.game-over')
+const $container = document.querySelector('.game')
+const timeEl = document.querySelector(".time p");
+const gameWon = document.querySelector('.win')
+
 
 function setPosition($element, x, y) {
     $element.style.transform = `translate(${x}px, ${y}px)`
@@ -34,7 +54,7 @@ function setSize($element, width) {
     $element.style.height = "auto"
 }
 
-function bound(x){
+function bound(x) {
   if (x >= gameWidth-state.spaceshipWidth) {
     state.xPos = gameWidth-state.spaceshipWidth;
     return gameWidth-state.spaceshipWidth
@@ -46,14 +66,48 @@ function bound(x){
   }
 }
 
-function deleteLaser(lasers, laser, $laser) {
-  const index = lasers.indexOf(laser)
-  lasers.splice(index, 1)
 
-  // $container.removeChild($laser)
+// function restartGame() {   
+//   state.restart = true;
+//   window.location.reload();
+// }
 
-  document.querySelectorAll('.laser')[index].remove()
+function hideGame() {
+  document.querySelectorAll('.game, .header').forEach(function(el) {
+    el.style.display = 'none'
+ });
 }
+
+function playSound(file) {
+  const audio = new Audio("sounds/" + file + ".wav");
+  audio.play();
+}
+
+function setTimer() {
+  let time = 0;
+
+  
+  displayTime(time);
+
+  const timer = setInterval(() => {
+    if (!state.paused) {
+      time++;
+    }
+    displayTime(time);
+
+    if (state.gameOver === true || state.gameWon === true) {
+      clearInterval(timer);
+    }
+  }, 1000);
+
+  
+  function displayTime(second) {
+    const min = Math.floor(second / 60);
+    const sec = Math.floor(second % 60);
+    timeEl.innerHTML = `${min < 10 ? "0" : ""}${min}:${sec < 10 ? "0" : ""}${sec}`;
+  }
+}
+
 
 function collideRect(rect1, rect2){
   return!(rect2.left > rect1.right || 
@@ -62,11 +116,47 @@ function collideRect(rect1, rect2){
     rect2.bottom < rect1.top)
 }
 
+// ENEMIES !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+function createEnemy($container, x, y) {
+  const $enemy = document.createElement("img")
+  $enemy.src = 'assets/enemy2.svg'
+  $enemy.className = "enemy"
+  $container.appendChild($enemy)
+  const enemyCooldown = Math.floor(Math.random() * 100);
+  const enemy = {x, y, $enemy, enemyCooldown}
+  state.enemies.push(enemy)
+  setSize($enemy, state.enemyWidth)
+  setPosition($enemy, x, y)
+}
+
+function updateEnemies() {
+    const dx = Math.sin(Date.now()/1000)*40
+    const dy = Math.cos(Date.now()/1000)*60
+    const enemies = state.enemies
+    for (i = 0; i < enemies.length; i++){
+      const enemy = enemies[i]
+      var a = enemy.x + dx
+      var b = enemy.y + dy
+      setPosition(enemy.$enemy, a, b)
+      enemy.Cooldown = Math.random(0, 10);
+      if (enemy.enemyCooldown == 0) {
+          createEnemyLaser($container, a, b);
+          enemy.enemyCooldown = Math.floor(Math.random() * 50) + 100;
+      }
+      enemy.enemyCooldown -= 0.5;
+    }
+     
+}
+
+
+// PLAYER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 function createPlayer($container) {
-    state.xPos = gameWidth / 2
-    state.yPos = gameHeight - 50
+    state.xPos = gameWidth /2
+    state.yPos = gameHeight -40
     const $player = document.createElement('img')
-    $player.src = "assets/spaceship.svg"
+    $player.src = "assets/spacecraft2.svg"
     $player.className = 'player'
     $container.appendChild($player)
     setPosition($player, state.xPos, state.yPos)
@@ -79,8 +169,8 @@ function updatePlayer() {
   } if (state.moveRight){
     state.xPos += 3;
   } if (state.shoot && state.cooldown === 0) {
-    createLaser($container, state.xPos - state.spaceshipWidth/2, state.yPos)
-    state.cooldown = 30
+    createLaser($container, state.xPos + state.spaceshipWidth/2, state.yPos)
+    state.cooldown = 20
   }
   const $player = document.querySelector(".player")
   setPosition($player, bound(state.xPos), state.yPos-10)
@@ -89,7 +179,8 @@ function updatePlayer() {
   }
 }
 
-// Laser
+// LASER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 function createLaser($container, x, y) {
   const $laser = document.createElement("img")
   $laser.src = 'assets/laser.png'
@@ -100,11 +191,11 @@ function createLaser($container, x, y) {
   setPosition($laser, x, y)
 }
 
-function updateLaser($container){
+function updateLaser(){
   const lasers = state.lasers
   for(i = 0; i < lasers.length; i++){
     const laser = lasers[i]
-    laser.y -= 2
+    laser.y -= 4
     if (laser.y < 0){
       deleteLaser(lasers, laser, laser.$laser)
     }
@@ -115,91 +206,164 @@ function updateLaser($container){
       const enemy = enemies[j]
       const enemyRect = enemy.$enemy.getBoundingClientRect()
       if(collideRect(enemyRect, laserRect)){
+        playSound("bullet")
         deleteLaser(lasers, laser, laser.$laser)
         const index = enemies.indexOf(enemy)
-
-        console.log(index)
-        // $container.removeChild(enemy)
-
-        document.querySelectorAll('.enemy')[index].remove()
-
         enemies.splice(index , 1)
+        //$container.removeChild(enemy)
+        document.querySelectorAll('.enemy')[index].remove()
+        state.score += 100
+        score.innerHTML = state.score
       }
     }
   }
 }
 
-
-function createEnemy($container, x, y) {
-  const $enemy = document.createElement("img")
-  $enemy.src = 'assets/alien.svg'
-  $enemy.className = "enemy"
-  $container.appendChild($enemy)
-  const enemy = {x, y, $enemy}
-  state.enemies.push(enemy)
-  setSize($enemy, state.enemyWidth)
-  setPosition($enemy, x, y)
+// Enemy Laser
+function createEnemyLaser($container, x, y){
+  const $enemyLaser = document.createElement("img");
+  $enemyLaser.src = "assets/black-laser.png";
+  $enemyLaser.className = "enemyLaser";
+  $container.appendChild($enemyLaser);
+  const enemyLaser = {x, y, $enemyLaser};
+  state.enemyLasers.push(enemyLaser);
+  setPosition($enemyLaser, x, y);
 }
 
-function updateEnemies($container){
-  const dx = Math.sin(Date.now()/1000)*40
-  const dy = Math.sin(Date.now()/1000)*30
-  const enemies = state.enemies
-  for (let i = 0; i < enemies.length; i++){
-    const enemy = enemies[i]
-    var a = enemy.x + dx
-    var b = enemy.y + dy
-    setPosition(enemy.$enemy, a, b)
+function updateEnemyLaser($container){
+  const enemyLasers = state.enemyLasers;
+  for(let i = 0; i < enemyLasers.length; i++){
+    const enemyLaser = enemyLasers[i];
+    enemyLaser.y += 2;
+    if (enemyLaser.y > gameHeight-30){
+      deleteLaser(enemyLasers, enemyLaser, enemyLaser.$enemyLaser);
+    }
+    const enemyLaserRect = enemyLaser.$enemyLaser.getBoundingClientRect();
+    const spaceshipRect = document.querySelector(".player").getBoundingClientRect();
+    if(collideRect(spaceshipRect, enemyLaserRect)){
+      playSound("shot2");
+      deleteLaser(enemyLasers, enemyLaser, enemyLaser.$enemyLaser);
+
+      // lives.removeChild(lives.lastChild);
+      // if (!lives.hasChildNodes()) {
+      //   state.gameOver = true;
+      // }
+      state.lives--
+      lives.innerHTML = state.lives
+
+
+      if (state.lives === 0) {
+        state.gameOver = true;
+        hideGame()
+      }
+      
+    }
+    setPosition(enemyLaser.$enemyLaser, enemyLaser.x + state.enemyWidth/2, enemyLaser.y+15);
   }
 }
 
 function createEnemies($container) {
-  for (i = 0; i <= state.numberEnemies/2; i++) {
+  for (i = 0; i < state.numberEnemies/4; i++) {
     createEnemy($container, i*40, 80)
   }
-  for (i = 0; i <= state.numberEnemies/2; i++) {
+  for (i = 0; i < state.numberEnemies/4; i++) {
   createEnemy($container, i*40, 120)
   }
-  for (i = 0; i <= state.numberEnemies/2; i++) {
-    createEnemy($container, i*40, 160)
-  }
-  for (i = 0; i <= state.numberEnemies/2; i++) {
-    createEnemy($container, i*40, 200)
-  }
+  // for (i = 0; i < state.numberEnemies/4; i++) {
+  //   createEnemy($container, i*40, 160)
+  // }
+  // for (i = 0; i < state.numberEnemies/4; i++) {
+  //   createEnemy($container, i*40, 200)
+  // }
 } 
 
+
+function deleteLaser(lasers, laser, $laser) {  
+  const index = lasers.indexOf(laser)
+  if (index !== -1) {
+    lasers.splice(index, 1)  
+    $container.removeChild($laser)
+  }
+}
+
 function keyPress(event) {
-    if (event.keyCode === right) {
-      state.moveRight = true
-    } else if (event.keyCode === left) {
-      state.moveLeft = true
-    } else if (event.keyCode === space) {
-      state.shoot = true
+  if (event.keyCode === right) {
+    state.moveRight = true
+  } else if (event.keyCode === left) {
+    state.moveLeft = true
+  } else if (event.keyCode === space) {
+    state.shoot = true
+  } else if (event.keyCode === esc) {
+    if (!state.gameOver && !state.gameWon && !state.paused){
+      state.paused = true
+      pause.style.display = "flex"
+    } else {
+    state.paused = false
+    pause.style.display = "none";
     }
+  } else if (event.keyCode === s) {
+    if (state.start) {
+      window.location.reload()
+    } else {
+      startGame()
+    }
+    
+  // } else if (event.keyCode === r) {
+  //   window.location.reload()
+  }
+
+
 }
 
 function keyRelease(event) {
-    if (event.keyCode === right) {
-      state.moveRight = false
-    } else if (event.keyCode === left) {
-      state.moveLeft = false
-    } else if (event.keyCode === space) {
-      state.shoot = false
-    }
+  if (event.keyCode === right) {
+    state.moveRight = false
+  } else if (event.keyCode === left) {
+    state.moveLeft = false
+  } else if (event.keyCode === space) {
+    state.shoot = false
+  } 
 }
 
-// Main update function
-function update() {
+function startGame() {
+  state.start = true
+  setTimer()
+  document.querySelector('.start').style.display = 'none'
+
+}
+
+function restartGame() {
+  window.location.reload()
+}
+
+
+function update() {  
+  if (state.start && !state.paused && !state.gameOver) {
   updatePlayer()
   updateLaser()
   updateEnemies()
+  updateEnemyLaser()
+} if (state.gameOver && !state.gameWon) {
+  // playSound("game_over");
+  gameOver.style.display = "flex"
+  setTimeout(restartGame, 4950)
+} if (state.enemies.length == 0 && !state.gameOver) {
+  // playSound("win")
+  state.gameWon = true
+  hideGame()
+  gameWon.style.display = "flex"
+  setTimeout(restartGame, 4950)
 
-  window.requestAnimationFrame(update)
+}
+  requestAnimationFrame(update)
+
 }
 
-const $container = document.querySelector('.game')
+
 createPlayer($container)
 createEnemies($container)
+// createEnemyLaser($container)
+
 
 // Event listeners 
 window.addEventListener('keydown', keyPress)

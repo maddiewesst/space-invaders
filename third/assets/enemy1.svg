@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Capa_1" data-name="Capa 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 50.63 24.37">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#linear-gradient-3);
+      }
+
+      .cls-1, .cls-2, .cls-3 {
+        stroke: #fff;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-2 {
+        fill: url(#linear-gradient-2);
+      }
+
+      .cls-4 {
+        opacity: .44;
+      }
+
+      .cls-3 {
+        fill: url(#linear-gradient);
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="24.84" y1="23.87" x2="24.84" y2="15.52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff"/>
+      <stop offset="1" stop-color="#000"/>
+    </linearGradient>
+    <linearGradient id="linear-gradient-2" x1="24.84" y1="3.67" x2="24.84" y2=".5" xlink:href="#linear-gradient"/>
+    <linearGradient id="linear-gradient-3" x1="25.3" y1="13.81" x2="25.3" y2="5.17" xlink:href="#linear-gradient"/>
+  </defs>
+  <g class="cls-4">
+    <path class="cls-3" d="M17.17,22.45c.07,.69,0,1.42,0,1.42h15.3v-1.63c3.75-.59,10.98-6.72,10.98-6.72H6.23s5.91,6.08,10.95,6.93Z"/>
+    <path class="cls-2" d="M30.24,.5h-10.7c-1.77,0-4.32,3.17-4.32,3.17h19.23s-1.85-3.17-4.21-3.17Z"/>
+    <path class="cls-1" d="M38.48,5.17H11.89L1.39,13.81H49.21l-10.74-8.64ZM15.6,11.48c-1.63,0-2.95-.81-2.95-1.81s1.32-1.82,2.95-1.82,2.95,.81,2.95,1.82-1.32,1.81-2.95,1.81Zm9.7,0c-1.63,0-2.95-.81-2.95-1.81s1.32-1.82,2.95-1.82,2.95,.81,2.95,1.82-1.32,1.81-2.95,1.81Zm9.84-.17c-1.63,0-2.95-.81-2.95-1.82s1.32-1.81,2.95-1.81,2.95,.81,2.95,1.81-1.32,1.82-2.95,1.82Z"/>
+  </g>
+</svg>

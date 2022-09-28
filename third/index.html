@@ -8,11 +8,37 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-            <div class="score">SCORE: </div>
-            <div class="game"></div>
-            <div class="lives">LIVES: </div>
-    </div>
+
+    <div class="container"> 
+        <div class="header">
+            <div class="lives">LIVES: <p>3</p></div>  
+            <div class="score">SCORE: <p>0</p> </div>
+            <div class="time">TIME: <p>00:00</p></div>
+        </div>
+        <div class="game-wrapper">
+            <div class="game"></div> 
+        </div>
+        
+        <div class ="start"> 
+            Press s to start game
+        </div>
+            <div class="game-over">
+                <h1>GAME OVER</h1>
+                <br>
+                <p>Press s to play again</p>
+            </div>
+            <div class="win">
+                <h1>YOU WON</h1> 
+                <br>
+                <p>Press s to play again</p>
+            </div>
+        
+            <div class="pause">
+            <p>Press esc to resume the game</p>
+            <p>Press s to restart the game</p>
+        </div> 
+    </div> 
+  
     <script src="space.js"></script>
 </body>
 </html>
