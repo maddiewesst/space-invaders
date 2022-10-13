@@ -8,7 +8,7 @@ const r = 82
 const u = 85
 
 const gameWidth= 500
-const gameHeight = 700
+const gameHeight = 750
 
 let i = 0
 let j = 0
@@ -35,6 +35,7 @@ const state = {
   start: false,
 }
 
+const body = document.querySelector('body');
 const header = document.querySelector('.header');
 const pause = document.querySelector('.pause')
 const lives = document.querySelector('.lives p')
@@ -43,6 +44,8 @@ const gameOver = document.querySelector('.game-over')
 const $container = document.querySelector('.game')
 const timeEl = document.querySelector(".time p");
 const gameWon = document.querySelector('.win')
+const start = document.querySelector('.start')
+const game = document.querySelector('.game')
 
 
 function setPosition($element, x, y) {
@@ -66,48 +69,38 @@ function bound(x) {
   }
 }
 
-
-// function restartGame() {   
-//   state.restart = true;
-//   window.location.reload();
-// }
-
 function hideGame() {
-  document.querySelectorAll('.game, .header').forEach(function(el) {
-    el.style.display = 'none'
- });
+
+  // // Delete all enemy ufos
+  // const enemies = state.enemies;
+  // for (let i = 0; i < enemies.length; i++) {
+  //     const enemy = enemies[i];
+  //     deleteLaser(enemies, enemy, enemy.$enemy);
+  // }
+
+  // // // Delete all enemy lasers
+  // const enemyLasers = state.enemyLasers;
+  // for (let i = 0; i < enemyLasers.length; i++) {
+  //     const enemyLaser = enemyLasers[i];
+  //     deleteLaser(enemyLasers, enemyLaser, enemyLaser.$enemyLaser);
+  // }
+
+  // // // Delete all friendly lasers
+  // const lasers = state.lasers;
+  // for (let i = 0; i < lasers.length; i++) {
+  //     const laser = lasers[i];
+  //     deleteLaser(lasers, laser, laser.$laser);
+  // }
+
+  game.style.opacity = '0'
+  header.style.display = '0'
+
 }
 
 function playSound(file) {
   const audio = new Audio("sounds/" + file + ".wav");
   audio.play();
 }
-
-function setTimer() {
-  let time = 0;
-
-  
-  displayTime(time);
-
-  const timer = setInterval(() => {
-    if (!state.paused) {
-      time++;
-    }
-    displayTime(time);
-
-    if (state.gameOver === true || state.gameWon === true) {
-      clearInterval(timer);
-    }
-  }, 1000);
-
-  
-  function displayTime(second) {
-    const min = Math.floor(second / 60);
-    const sec = Math.floor(second % 60);
-    timeEl.innerHTML = `${min < 10 ? "0" : ""}${min}:${sec < 10 ? "0" : ""}${sec}`;
-  }
-}
-
 
 function collideRect(rect1, rect2){
   return!(rect2.left > rect1.right || 
@@ -139,10 +132,11 @@ function updateEnemies() {
       var a = enemy.x + dx
       var b = enemy.y + dy
       setPosition(enemy.$enemy, a, b)
-      enemy.Cooldown = Math.random(0, 10);
+     
+      //enemy.Cooldown = Math.random(0, 10);
       if (enemy.enemyCooldown == 0) {
-          createEnemyLaser($container, a, b);
-          enemy.enemyCooldown = Math.floor(Math.random() * 50) + 100;
+          //createEnemyLaser($container, a, b);
+          enemy.enemyCooldown = Math.floor(Math.random() * 100) + 100;
       }
       enemy.enemyCooldown -= 0.5;
     }
@@ -169,7 +163,7 @@ function updatePlayer() {
   } if (state.moveRight){
     state.xPos += 3;
   } if (state.shoot && state.cooldown === 0) {
-    createLaser($container, state.xPos + state.spaceshipWidth/2, state.yPos)
+    createLaser($container, state.xPos - state.spaceshipWidth/2, state.yPos)
     state.cooldown = 20
   }
   const $player = document.querySelector(".player")
@@ -222,7 +216,7 @@ function updateLaser(){
 // Enemy Laser
 function createEnemyLaser($container, x, y){
   const $enemyLaser = document.createElement("img");
-  $enemyLaser.src = "assets/black-laser.png";
+  $enemyLaser.src = "assets/laser-orange.svg";
   $enemyLaser.className = "enemyLaser";
   $container.appendChild($enemyLaser);
   const enemyLaser = {x, y, $enemyLaser};
@@ -290,29 +284,25 @@ function keyPress(event) {
   if (event.keyCode === right) {
     state.moveRight = true
   } else if (event.keyCode === left) {
-    state.moveLeft = true
+    state.moveLeft = true 
   } else if (event.keyCode === space) {
     state.shoot = true
   } else if (event.keyCode === esc) {
     if (!state.gameOver && !state.gameWon && !state.paused){
       state.paused = true
-      pause.style.display = "flex"
     } else {
     state.paused = false
-    pause.style.display = "none";
     }
   } else if (event.keyCode === s) {
     if (state.start) {
       window.location.reload()
     } else {
-      startGame()
+      state.start = true
     }
     
   // } else if (event.keyCode === r) {
   //   window.location.reload()
   }
-
-
 }
 
 function keyRelease(event) {
@@ -325,38 +315,51 @@ function keyRelease(event) {
   } 
 }
 
-function startGame() {
-  state.start = true
-  setTimer()
-  document.querySelector('.start').style.display = 'none'
-
-}
-
-function restartGame() {
-  window.location.reload()
-}
-
-
+let counter = 0
+let time = 0
 function update() {  
   if (state.start && !state.paused && !state.gameOver) {
+    start.style.opacity = '0'
+    header.style.opacity = '1'
   updatePlayer()
   updateLaser()
   updateEnemies()
   updateEnemyLaser()
 } if (state.gameOver && !state.gameWon) {
   // playSound("game_over");
-  gameOver.style.display = "flex"
-  setTimeout(restartGame, 4950)
+  gameOver.style.opacity = "1"
 } if (state.enemies.length == 0 && !state.gameOver) {
   // playSound("win")
   state.gameWon = true
   hideGame()
-  gameWon.style.display = "flex"
-  setTimeout(restartGame, 4950)
-
+  gameWon.style.opacity = "1"
 }
-  requestAnimationFrame(update)
-
+if (state.paused) {
+  pause.style.opacity = "1"
+} else {
+  pause.style.opacity = "0"
+}
+  
+  // set timer
+  if (state.start && !state.paused) {
+  counter++;
+  if (counter === 60) {
+    counter = 0
+    time++
+  }
+  console.log(time)
+}
+displayTime(time);
+if (state.gameOver === true || state.gameWon === true) {
+  counter = 0
+  time = 0
+}
+requestAnimationFrame(update)
+}
+function displayTime(second) {
+  const min = Math.floor(second / 60);
+  const sec = Math.floor(second % 60);
+  timeEl.innerHTML = `${min < 10 ? "0" : ""}${min}:${sec < 10 ? "0" : ""}${sec}`;
 }
 
 
@@ -366,8 +369,8 @@ createEnemies($container)
 
 
 // Event listeners 
-window.addEventListener('keydown', keyPress)
-window.addEventListener('keyup', keyRelease)
+body.addEventListener('keydown', keyPress)
+body.addEventListener('keyup', keyRelease)
 
 
 update()
