@@ -33,6 +33,7 @@ const state = {
   score: 0,
   gameWon: false,
   start: false,
+  direction: true,
 }
 
 const body = document.querySelector('body');
@@ -46,6 +47,8 @@ const timeEl = document.querySelector(".time p");
 const gameWon = document.querySelector('.win')
 const start = document.querySelector('.start')
 const game = document.querySelector('.game')
+const enemyDiv = document.querySelector(".enemy-div");
+const enemies = state.enemies
 
 
 function setPosition($element, x, y) {
@@ -70,31 +73,8 @@ function bound(x) {
 }
 
 function hideGame() {
-
-  // // Delete all enemy ufos
-  // const enemies = state.enemies;
-  // for (let i = 0; i < enemies.length; i++) {
-  //     const enemy = enemies[i];
-  //     deleteLaser(enemies, enemy, enemy.$enemy);
-  // }
-
-  // // // Delete all enemy lasers
-  // const enemyLasers = state.enemyLasers;
-  // for (let i = 0; i < enemyLasers.length; i++) {
-  //     const enemyLaser = enemyLasers[i];
-  //     deleteLaser(enemyLasers, enemyLaser, enemyLaser.$enemyLaser);
-  // }
-
-  // // // Delete all friendly lasers
-  // const lasers = state.lasers;
-  // for (let i = 0; i < lasers.length; i++) {
-  //     const laser = lasers[i];
-  //     deleteLaser(lasers, laser, laser.$laser);
-  // }
-
   game.style.opacity = '0'
   header.style.display = '0'
-
 }
 
 function playSound(file) {
@@ -115,7 +95,7 @@ function createEnemy($container, x, y) {
   const $enemy = document.createElement("img")
   $enemy.src = 'assets/enemy2.svg'
   $enemy.className = "enemy"
-  $container.appendChild($enemy)
+  enemyDiv.appendChild($enemy)
   const enemyCooldown = Math.floor(Math.random() * 100);
   const enemy = {x, y, $enemy, enemyCooldown}
   state.enemies.push(enemy)
@@ -124,24 +104,42 @@ function createEnemy($container, x, y) {
 }
 
 function updateEnemies() {
+
+// const enemies = state.enemies ////
+//   for (i = 0; i < enemies.length; i++){
+//     const enemy = enemies[i]
+//     console.log(enemies.length)
+
+// if (state.direction === true) {
+//   enemy.x += 3
+// }
+// if (state.direction === false) {
+//   enemy.y -= 3
+// }
+
+
+
     const dx = Math.sin(Date.now()/1000)*40
     const dy = Math.cos(Date.now()/1000)*60
-    const enemies = state.enemies
+   //const enemies = state.enemies
     for (i = 0; i < enemies.length; i++){
       const enemy = enemies[i]
       var a = enemy.x + dx
       var b = enemy.y + dy
       setPosition(enemy.$enemy, a, b)
      
-      //enemy.Cooldown = Math.random(0, 10);
+
+     // ENEMY LASERS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      enemy.Cooldown = Math.random(0, 10);
       if (enemy.enemyCooldown == 0) {
           //createEnemyLaser($container, a, b);
           enemy.enemyCooldown = Math.floor(Math.random() * 100) + 100;
       }
       enemy.enemyCooldown -= 0.5;
     }
-     
 }
+     
+
 
 
 // PLAYER !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -195,7 +193,7 @@ function updateLaser(){
     }
     setPosition(laser.$laser, laser.x, laser.y)
     const laserRect = laser.$laser.getBoundingClientRect()
-    const enemies = state.enemies
+    //const enemies = state.enemies
     for(j = 0; j < enemies.length; j++){
       const enemy = enemies[j]
       const enemyRect = enemy.$enemy.getBoundingClientRect()
@@ -270,6 +268,7 @@ function createEnemies($container) {
   //   createEnemy($container, i*40, 200)
   // }
 } 
+
 
 
 function deleteLaser(lasers, laser, $laser) {  
@@ -347,7 +346,6 @@ if (state.paused) {
     counter = 0
     time++
   }
-  console.log(time)
 }
 displayTime(time);
 if (state.gameOver === true || state.gameWon === true) {
